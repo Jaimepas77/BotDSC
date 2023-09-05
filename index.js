@@ -51,6 +51,11 @@ client.on('messageCreate', async (message) => {
             break
         }
     }
+
+    //MENSAJE TROL XD
+    if (message.content.includes('vaya bot')) {
+        message.reply('¿Qué decis de mi? Porque siempre habláis a mi espalda ehh😡😡')
+    }
 })
 
 //Consola
