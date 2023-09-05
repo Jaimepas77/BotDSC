@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Collection, ActivityType } = require('discord.js');
 
 const config = require('./config.json');
 
@@ -9,6 +9,11 @@ const { loadCommands } = require('./Functions/loadCommands');
 const client = new Client({
     intents: [Object.keys(GatewayIntentBits)],
     partials: [Object.keys(Partials)],
+});
+
+client.once('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
+    client.user.setActivity('Lhelp', { type: ActivityType.Listening });
 });
 
 client.commands = new Collection();
@@ -23,14 +28,24 @@ client.on('messageCreate', async (message) => {
     for (i = 0; i < saludos.length; i++) {
         if (message.content.toLowerCase().includes(saludos[i])) {
             return message.reply({ content: `👋 Buenas ${message.author}, como estás?` })
-            break
         }
     }
 
     //ELIMINACIÓN DE MALSONANTES
-    const insultos = ['mierda', 'mierdas', 'mierdon', 'Mierda', 'Mierdas', 'Mierdon', 'capullo', 'capullos', 'capullas', 'capulla', 'Capullo', 'Capulla', 'Capullos', 'Capullas', 'jilipollas', 'Jilipollas', 'cabron', 'cabrón', 'cabrones', 'Cabron', 'Cabrón', 'Cabrones', 'puta', 'putas', 'puto', 'putos', 'Putas', 'Putos', 'Puta', 'Puto', 'zorra', 'zorras', 'Zorra', 'Zorras', 'polla', 'pollon', 'pollón', 'pollas', 'Polla', 'Pollon', 'Pollón', 'Pollas', 'cabronazo', 'Cabronazo', 'cabronazos', 'Cabronazos', 'cabrona', 'Cabrona', 'cabronas', 'Cabronas'];
+    //Si el mensaje es de un bot, no se elimina
+    if (message.author.bot) return
+    let insultos = []
+    const fs = require('fs')
+    fs.readFile('./insultos.txt', 'utf-8', function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        insultos = data.split('\r\n')
+    });
+    await new Promise(r => setTimeout(r, 1000));//Espera 1 segundo para que se carguen los insultos y si no se carga, no se elimina el mensaje
+
     for (i = 0; i < insultos.length; i++) {
-        if (message.content.toLowerCase().includes(insultos[i])) {
+        if (message.content.toLowerCase().includes(insultos[i].toLowerCase())) {
             message.channel.send({ content: `${message.author}, por favor no escribas ese tipo de groserías` })
             await message.delete()
             break
